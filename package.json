@@ -1,0 +1,46 @@
+{
+  "name": "auto-reload-webpack-plugin",
+  "version": "1.0.0",
+  "description": "A webpack plugin that restart automatically your application after compilation",
+  "author": "Paulo Rezende <rezendepauloeduardo@outlook.com>",
+  "homepage": "https://github.com/pauloedurezende/auto-reload-webpack-plugin#readme",
+  "keywords": [
+    "node",
+    "webpack",
+    "plugin",
+    "start",
+    "reload",
+    "auto",
+    "load"
+  ],
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "coverage": "jest --colors --coverage",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
+    "jest": "jest --colors --verbose",
+    "lint": "eslint src/**/*.js test/**/*.js",
+    "start": "node src/index.js",
+    "test": "npm run lint && npm run jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pauloedurezende/auto-reload-webpack-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pauloedurezende/auto-reload-webpack-plugin/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "23.3.10",
+    "coveralls": "3.0.2",
+    "eslint": "5.9.0",
+    "eslint-config-prettier": "3.3.0",
+    "eslint-plugin-prettier": "3.0.0",
+    "jest": "23.6.0",
+    "prettier": "1.15.3"
+  },
+  "license": "MIT"
+}
