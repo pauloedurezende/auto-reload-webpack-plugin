@@ -2,8 +2,12 @@ const { resolve } = require('path');
 const cluster = require('cluster');
 const process = require('process');
 
+const defaultOptions = {
+  filePath: 'dist/server.js'
+};
+
 class AutoReloadWebpackPlugin {
-  constructor({ filePath }) {
+  constructor({ filePath } = defaultOptions) {
     this.filePath = filePath;
     this.currentWorker = null;
   }
