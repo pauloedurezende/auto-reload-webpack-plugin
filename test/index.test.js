@@ -1,24 +1,23 @@
 const cluster = require('cluster');
 const { resolve } = require('path');
-const Plugin = require('../src');
+const AutoReloadWebpackPlugin = require('../src');
 
 describe('AutoReloadWebpackPlugin', () => {
   beforeEach(() => {
-    this.plugin = new Plugin({ filePath: 'test/mocks/server.js' });
+    this.plugin = new AutoReloadWebpackPlugin({
+      file: resolve(process.cwd(), 'test/mocks/server.js')
+    });
   });
 
   describe('constructor', () => {
-    test('should receive a default `filePath`', () => {
-      const optionDefault = new Plugin();
-      expect(optionDefault.filePath).toEqual('dist/server.js');
+    test('should receive a custom `file`', () => {
+      expect(this.plugin.file).toEqual(
+        resolve(process.cwd(), 'test/mocks/server.js')
+      );
     });
 
-    test('should receive a custom `filePath`', () => {
-      expect(this.plugin.filePath).toEqual('test/mocks/server.js');
-    });
-
-    test('should not have a `currentWorker` defined', () => {
-      expect(this.plugin.currentWorker).toEqual(null);
+    test('should not have a `worker` defined', () => {
+      expect(this.plugin.worker).toEqual(null);
     });
   });
 
@@ -44,7 +43,7 @@ describe('AutoReloadWebpackPlugin', () => {
     });
 
     test('should setup a master process', () => {
-      const path = resolve(process.cwd(), this.plugin.filePath);
+      const path = resolve(process.cwd(), this.plugin.file);
 
       expect(this.setupMaster).toHaveBeenCalledWith({
         exec: path
@@ -59,10 +58,10 @@ describe('AutoReloadWebpackPlugin', () => {
       expect(this.on.mock.calls[0][0]).toEqual('online');
     });
 
-    test('should set the `currentWorker`', () => {
+    test('should set the `worker`', () => {
       cluster.emit('online', this.worker);
 
-      expect(this.plugin.currentWorker).toEqual(this.worker);
+      expect(this.plugin.worker).toEqual(this.worker);
     });
 
     test('should add `afterEmit` hook', () => {
@@ -70,18 +69,21 @@ describe('AutoReloadWebpackPlugin', () => {
     });
 
     describe('when `afterEmit` is triggered', () => {
-      describe('if `currentWorker` exists', () => {
+      describe('if `worker` exists', () => {
         beforeEach(() => {
-          this.kill = jest.spyOn(process, 'kill');
+          this.console = jest
+            .spyOn(console, 'warn')
+            .mockImplementation(() => {});
+          this.kill = jest.spyOn(process, 'kill').mockImplementation(() => {
+            throw new Error();
+          });
           this.fork = jest.spyOn(cluster, 'fork').mockImplementation(() => {});
-
-          this.plugin.currentWorker = { process: { pid: 1234 } };
+          this.plugin.worker = { process: { pid: 1234 } };
           this.compiler = {
             hooks: {
               afterEmit: {
                 tap: (event, callback) => {
                   expect(event).toEqual('AutoReloadWebpackPlugin');
-
                   callback();
                 }
               }
@@ -111,17 +113,14 @@ describe('AutoReloadWebpackPlugin', () => {
           });
         });
       });
-
-      describe('if `currentWorker` not exists', () => {
+      describe('if `worker` not exists', () => {
         beforeEach(() => {
           this.fork = jest.spyOn(cluster, 'fork').mockImplementation(() => {});
-
           this.compiler = {
             hooks: {
               afterEmit: {
                 tap: (event, callback) => {
                   expect(event).toEqual('AutoReloadWebpackPlugin');
-
                   callback();
                 }
               }
