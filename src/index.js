@@ -1,42 +1,30 @@
-const { resolve } = require('path');
 const cluster = require('cluster');
-const process = require('process');
-
-const defaultOptions = {
-  filePath: 'dist/server.js'
-};
+const { getFileExecutionPath } = require('./utils');
 
 class AutoReloadWebpackPlugin {
-  constructor({ filePath } = defaultOptions) {
-    this.filePath = filePath;
-    this.currentWorker = null;
+  constructor({ file }) {
+    this.file = getFileExecutionPath(file);
+    this.worker = null;
   }
 
-  apply(compiler) {
+  apply({ hooks }) {
     cluster.setupMaster({
-      exec: resolve(process.cwd(), this.filePath)
+      exec: this.file
     });
 
-    cluster.on('online', (worker) => {
-      this.currentWorker = worker;
-    });
+    cluster.on('online', (worker) => (this.worker = worker));
+    cluster.on('exit', () => cluster.fork());
 
-    cluster.on('exit', () => {
-      cluster.fork();
-    });
-
-    compiler.hooks.afterEmit.tap('AutoReloadWebpackPlugin', () => {
-      if (this.currentWorker) {
+    hooks.afterEmit.tap('AutoReloadWebpackPlugin', () => {
+      if (this.worker) {
         try {
-          process.kill(this.currentWorker.process.pid, 'SIGTERM');
-        } catch (e) {
+          process.kill(this.worker.process.pid, 'SIGTERM');
+        } catch (error) {
           console.warn('Could not terminate this process');
         }
       }
 
-      if (!this.currentWorker) {
-        cluster.fork();
-      }
+      !this.worker && cluster.fork();
     });
   }
 }
