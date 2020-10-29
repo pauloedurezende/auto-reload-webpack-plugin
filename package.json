@@ -4,6 +4,11 @@
   "description": "A webpack plugin that restart automatically your application after compilation",
   "author": "Paulo Rezende <rezendepauloeduardo@outlook.com>",
   "homepage": "https://github.com/pauloedurezende/auto-reload-webpack-plugin#readme",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "node",
     "webpack",
