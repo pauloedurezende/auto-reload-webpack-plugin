@@ -22,8 +22,9 @@
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
     "jest": "jest --colors --verbose",
     "lint": "eslint src/**/*.js test/**/*.js",
-    "start": "node src/index.js",
-    "test": "npm run lint && npm run jest"
+    "test": "npm run lint && npm run jest",
+    "dev": "webpack --env mode=development",
+    "build": "webpack --env mode=production"
   },
   "repository": {
     "type": "git",
