@@ -25,5 +25,19 @@ module.exports = {
         arrowParens: 'always',
       },
     ],
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'never',
+        ts: 'never',
+      },
+    ],
+    'lines-between-class-members': [
+      'error',
+      'always',
+      { exceptAfterSingleLine: true },
+    ],
+    'no-return-assign': ['error', 'except-parens'],
   },
 };
