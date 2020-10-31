@@ -1,25 +1,12 @@
 import cluster, { Worker } from 'cluster';
 
-interface IWebpack {
-  hooks: {
-    afterEmit: {
-      tap(identifier: string, callback: any): void;
-    };
-  };
-}
-
-interface IPlugin {
-  file: string;
-  worker?: Worker;
-  apply(params: IWebpack): void;
-}
+import { IPlugin, IConstructor, IWebpack } from './interfaces';
 
 class AutoReloadPlugin implements IPlugin {
   file: string;
-
   worker?: Worker;
 
-  constructor({ file }: IPlugin) {
+  constructor({ file }: IConstructor) {
     this.file = file;
     this.worker = undefined;
   }
@@ -27,9 +14,7 @@ class AutoReloadPlugin implements IPlugin {
   apply({ hooks }: IWebpack): void {
     cluster.setupMaster({ exec: this.file });
 
-    cluster.on('online', (worker) => {
-      this.worker = worker;
-    });
+    cluster.on('online', (worker) => (this.worker = worker));
     cluster.on('exit', () => cluster.fork());
 
     hooks.afterEmit.tap('AutoReloadWebpackPlugin', () => {
@@ -37,7 +22,7 @@ class AutoReloadPlugin implements IPlugin {
         try {
           process.kill(this.worker.process.pid, 'SIGTERM');
         } catch (err) {
-          console.warn(
+          console.error(
             `The process could not be terminated - PID #${this.worker.process.pid}`,
             err
           );
